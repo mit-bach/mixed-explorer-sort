@@ -1,0 +1,10 @@
+{
+	"id": "mixed-explorer-sort",
+	"name": "Mix Folders and Files",
+	"version": "1.0.0",
+	"minAppVersion": "1.7.2",
+	"description": "Sort files and folders together in File Explorer by modified time, created time, or name. Folders mix with files instead of listing first.",
+	"author": "Dominik Bach",
+	"authorUrl": "https://github.com/mit-bach",
+	"isDesktopOnly": false
+}

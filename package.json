@@ -1,0 +1,30 @@
+{
+	"name": "mixed-explorer-sort",
+	"version": "1.0.0",
+	"description": "Sort files and folders together in File Explorer by modified time, created time, or name.",
+	"main": "main.js",
+	"type": "module",
+	"scripts": {
+		"dev": "node esbuild.config.mjs",
+		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
+		"test": "vitest run",
+		"version": "node version-bump.mjs && git add manifest.json versions.json"
+	},
+	"keywords": [
+		"obsidian",
+		"file-explorer",
+		"sort"
+	],
+	"license": "MIT",
+	"dependencies": {
+		"monkey-around": "3.0.0"
+	},
+	"devDependencies": {
+		"@types/node": "22.20.1",
+		"esbuild": "0.25.5",
+		"obsidian": "1.13.1",
+		"obsidian-typings": "6.34.0",
+		"typescript": "5.9.3",
+		"vitest": "3.2.7"
+	}
+}
