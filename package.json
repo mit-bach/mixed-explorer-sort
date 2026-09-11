@@ -1,6 +1,6 @@
 {
 	"name": "mixed-explorer-sort",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "Sort files and folders together in File Explorer by modified time, created time, or name.",
 	"main": "main.js",
 	"type": "module",

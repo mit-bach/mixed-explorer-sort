@@ -4,6 +4,8 @@ Sort files and folders together in File Explorer. Folders mix with notes instead
 
 Use the native Files sort menu: modified time (new to old or old to new), created time, or name. The same rule applies to folders.
 
+Modified and created order use the filesystem clock at millisecond resolution (`mtimeMs`, and `birthtimeMs` for created time on macOS and Windows). Files made in the same minute at different seconds sort in that second order.
+
 ## Why
 
 Core File Explorer always lists every folder, then every file. This plugin removes that split. A note you edited a minute ago can sit above an older folder. A folder whose contents were edited recently can sit above an older note.

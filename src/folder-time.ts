@@ -1,3 +1,4 @@
+import { asMillis, type DiskTimeCache } from './disk-time';
 import {
 	isVaultFolder,
 	type FolderStatAdapter,
@@ -6,6 +7,7 @@ import {
 	type FolderTimeMode,
 	type TimeKey,
 	type VaultChild,
+	type VaultFile,
 	type VaultFolder,
 } from './types';
 
@@ -45,6 +47,7 @@ export class FolderTimeCache implements FolderTimeLookup {
 	constructor(
 		private readonly adapter: FolderStatAdapter | null,
 		mode: FolderTimeMode,
+		private readonly diskTimes: DiskTimeCache | null = null,
 	) {
 		this.mode = mode;
 	}
@@ -65,6 +68,16 @@ export class FolderTimeCache implements FolderTimeLookup {
 		this.computed.clear();
 		this.filesystem.clear();
 		this.inflight.clear();
+		this.diskTimes?.clear();
+	}
+
+	getFileTime(file: VaultFile, timeKey: TimeKey): number {
+		const disk = this.diskTimes?.read(file.path);
+		if (disk !== null && disk !== undefined) {
+			return timeKey === 'mtime' ? disk.mtime : disk.created;
+		}
+		const fallback = timeKey === 'mtime' ? file.stat.mtime : file.stat.ctime;
+		return asMillis(fallback) || fallback;
 	}
 
 	invalidatePath(path: string): void {
@@ -77,7 +90,9 @@ export class FolderTimeCache implements FolderTimeLookup {
 		}
 		for (const folderPath of prefixes) {
 			this.filesystem.delete(folderPath);
+			this.diskTimes?.invalidate(folderPath);
 		}
+		this.diskTimes?.invalidate(path);
 	}
 
 	cacheFilesystemStat(path: string, stat: FolderStatSnapshot | null): void {
@@ -129,7 +144,7 @@ export class FolderTimeCache implements FolderTimeLookup {
 		stack: Set<string>,
 	): number {
 		if (!isVaultFolder(child)) {
-			return timeKey === 'mtime' ? child.stat.mtime : child.stat.ctime;
+			return this.getFileTime(child, timeKey);
 		}
 		if (this.mode === 'newest-direct-child') {
 			return EMPTY_FOLDER_TIME;
@@ -157,7 +172,8 @@ export class FolderTimeCache implements FolderTimeLookup {
 		if (cached === null) {
 			return EMPTY_FOLDER_TIME;
 		}
-		return timeKey === 'mtime' ? cached.mtime : cached.ctime;
+		const raw = timeKey === 'mtime' ? cached.mtime : cached.ctime;
+		return asMillis(raw) || raw;
 	}
 
 	private scheduleStat(path: string): void {

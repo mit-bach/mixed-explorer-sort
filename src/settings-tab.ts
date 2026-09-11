@@ -25,7 +25,7 @@ export class MixedExplorerSortSettingTab extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName('Mix folders with files')
 			.setDesc(
-				'Treat folders like files under one sort. Off restores core folders-first order.',
+				'Treat folders like files under one sort. Off keeps folders first. Modified and created still use full disk timestamps (seconds, not minutes).',
 			)
 			.addToggle((toggle) =>
 				toggle

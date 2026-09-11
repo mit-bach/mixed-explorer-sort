@@ -1,5 +1,7 @@
-import { Plugin, TAbstractFile } from 'obsidian';
+import { FileSystemAdapter, Plugin, TAbstractFile } from 'obsidian';
+import type { DataAdapter } from 'obsidian';
 
+import { DiskTimeCache, type AbsolutePathResolver } from './disk-time';
 import { FolderTimeCache } from './folder-time';
 import { FileExplorerPatch } from './patch-file-explorer';
 import { parseSettings, settingsForSave } from './settings';
@@ -10,17 +12,31 @@ import {
 	type MixedExplorerSortSettings,
 } from './types';
 
+function absolutePathResolver(adapter: DataAdapter): AbsolutePathResolver | null {
+	if (adapter instanceof FileSystemAdapter) {
+		return (normalizedPath: string): string => {
+			return adapter.getFullPath(normalizedPath);
+		};
+	}
+	return null;
+}
+
 export default class MixedExplorerSortPlugin extends Plugin {
 	settings!: MixedExplorerSortSettings;
 	folderTimes!: FolderTimeCache;
+	private diskTimes!: DiskTimeCache;
 	private patch!: FileExplorerPatch;
 
 	async onload(): Promise<void> {
 		const plugin = this;
 		await this.loadSettings();
+		this.diskTimes = new DiskTimeCache(
+			absolutePathResolver(this.app.vault.adapter),
+		);
 		this.folderTimes = new FolderTimeCache(
 			this.app.vault.adapter,
 			this.settings.folderTimeMode,
+			this.diskTimes,
 		);
 		this.patch = new FileExplorerPatch({
 			app: this.app,

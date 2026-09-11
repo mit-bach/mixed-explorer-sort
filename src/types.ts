@@ -87,6 +87,7 @@ export interface FolderStatAdapter {
 
 export interface FolderTimeLookup {
 	getTime(folder: VaultFolder, timeKey: TimeKey): number;
+	getFileTime(file: VaultFile, timeKey: TimeKey): number;
 }
 
 export function isVaultFolder(entry: VaultChild): entry is VaultFolder {

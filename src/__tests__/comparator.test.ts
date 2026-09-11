@@ -95,7 +95,7 @@ describe('compareMixed', () => {
 		expect(isFoldersFirst(mixed)).toBe(true);
 	});
 
-	it('returns the original old() array when mix is off', () => {
+	it('keeps folders first when mix is off but still uses file times', () => {
 		const folder = makeFolder('Archive', [makeFile('old.md', 10)]);
 		const recent = makeFile('Today.md', 999);
 		const folderTime = new FolderTimeCache(null, 'newest-descendant');
@@ -106,9 +106,25 @@ describe('compareMixed', () => {
 			{ ...DEFAULT_SETTINGS, mixFoldersWithFiles: false },
 			folderTime,
 		);
-		expect(mixed).toBe(original);
 		expect(namesOf(mixed)).toEqual(['Archive', 'Today.md']);
 		expect(isFoldersFirst(mixed)).toBe(true);
+	});
+
+	it('orders files in the same minute by seconds, newest first', () => {
+		const minute = 1_700_000_000_000;
+		const late = makeFile('late.md', minute + 45_000);
+		const early = makeFile('early.md', minute + 3_000);
+		const folderTime = new FolderTimeCache(null, 'newest-descendant');
+		expect(compareMixed(late, early, 'byModifiedTime', folderTime)).toBeLessThan(
+			0,
+		);
+		const mixed = wrapGetSortedFolderItems(
+			[itemOf(early), itemOf(late)],
+			'byModifiedTime',
+			{ ...DEFAULT_SETTINGS, mixFoldersWithFiles: true },
+			folderTime,
+		);
+		expect(namesOf(mixed)).toEqual(['late.md', 'early.md']);
 	});
 
 	it('breaks time ties with numeric-base name compare', () => {
